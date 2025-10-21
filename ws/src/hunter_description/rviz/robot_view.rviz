@@ -65,85 +65,6 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
-        base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        chassis:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        front_left_steering_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        front_left_wheel:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        front_right_steering_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        front_right_wheel:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        hitch_rx_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        hitch_ry_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        rear_left_susp_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        rear_left_wheel:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        rear_right_susp_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        rear_right_wheel:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        trailer_base_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-        trailer_chassis:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        trailer_hitch_link:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        trailer_left_wheel:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
-        trailer_right_wheel:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
       Mass Properties:
         Inertia: false
         Mass: false
@@ -157,43 +78,9 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
-        base_link:
-          Value: true
-        chassis:
-          Value: true
-        front_left_steering_link:
-          Value: true
-        front_left_wheel:
-          Value: true
-        front_right_steering_link:
-          Value: true
-        front_right_wheel:
-          Value: true
-        hitch_rx_link:
-          Value: true
-        hitch_ry_link:
-          Value: true
         map:
           Value: true
         odom:
-          Value: true
-        rear_left_susp_link:
-          Value: true
-        rear_left_wheel:
-          Value: true
-        rear_right_susp_link:
-          Value: true
-        rear_right_wheel:
-          Value: true
-        trailer_base_link:
-          Value: true
-        trailer_chassis:
-          Value: true
-        trailer_hitch_link:
-          Value: true
-        trailer_left_wheel:
-          Value: true
-        trailer_right_wheel:
           Value: true
         world:
           Value: true
@@ -206,30 +93,7 @@ Visualization Manager:
         world:
           map:
             odom:
-              base_link:
-                chassis:
-                  front_left_steering_link:
-                    front_left_wheel:
-                      {}
-                  front_right_steering_link:
-                    front_right_wheel:
-                      {}
-                  hitch_rx_link:
-                    hitch_ry_link:
-                      trailer_hitch_link:
-                        trailer_chassis:
-                          trailer_base_link:
-                            {}
-                          trailer_left_wheel:
-                            {}
-                          trailer_right_wheel:
-                            {}
-                  rear_left_susp_link:
-                    rear_left_wheel:
-                      {}
-                  rear_right_susp_link:
-                    rear_right_wheel:
-                      {}
+              {}
       Update Interval: 0
       Value: true
     - Alpha: 1

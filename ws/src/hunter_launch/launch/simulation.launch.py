@@ -110,6 +110,14 @@ def generate_launch_description():
         output='screen'
     )
 
+    # --- /odom msg -> (odom -> base_link) TF ---
+    odom_to_tf = Node(
+        package='planning',
+        executable='odom_to_tf',
+        name='odom_to_tf',
+        output='screen'
+    )
+
     return LaunchDescription([
         use_sim_time,
 
@@ -127,5 +135,6 @@ def generate_launch_description():
         pcd_static,
         occupancy_grid,
         static_world_to_map,
-        static_map_to_odom
+        static_map_to_odom,
+        odom_to_tf
     ])

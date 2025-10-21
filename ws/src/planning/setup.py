@@ -40,6 +40,7 @@ setup(
         'console_scripts': [
             'static_pcd_publisher = planning.static_pcd_publisher:main',
             'pcd_to_occupancy_grid = planning.pcd_to_occupancy_grid:main',
+            'odom_to_tf = planning.odom_to_tf:main',
         ],
     },
 )

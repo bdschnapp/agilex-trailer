@@ -38,8 +38,8 @@
     <child  link="rear_left_susp_link"/>
     <origin xyz="${x_base_to_rear} ${y_base_to_wheel} ${z_base_to_wheel}" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
-    <!-- ~6 cm travel, biased slightly upward so static load compresses downward -->
-    <limit lower="-0.05" upper="0.02" effort="1e6" velocity="1.0"/>
+    <!-- 4 cm travel, biased slightly upward so static load compresses downward -->
+    <limit lower="-0.03" upper="0.01" effort="1e6" velocity="1.0"/>
     <dynamics damping="300.0" friction="5.0"/>
   </joint>
 
@@ -71,7 +71,7 @@
     <child  link="rear_right_susp_link"/>
     <origin xyz="${x_base_to_rear} -${y_base_to_wheel} ${z_base_to_wheel}" rpy="0 0 0"/>
     <axis xyz="0 0 1"/>
-    <limit lower="-0.05" upper="0.02" effort="1e6" velocity="1.0"/>
+    <limit lower="-0.03" upper="0.01" effort="1e6" velocity="1.0"/>
     <dynamics damping="300.0" friction="5.0"/>
   </joint>
 
@@ -141,17 +141,17 @@
   </joint>
 
   <!-- ===== Trailer params (tweak as needed) ===== -->
-  <xacro:property name="trailer_length"         value="5.0"/>
+  <xacro:property name="trailer_length"         value="3.5"/>
   <xacro:property name="trailer_width"          value="0.8"/>
-  <xacro:property name="trailer_height"         value="1.2"/>
+  <xacro:property name="trailer_height"         value="0.8"/>
   <xacro:property name="trailer_mass"           value="100.0"/>
   <xacro:property name="hitch_height"           value="0.0"/>
 
   <!-- match your robot’s wheel radius if you want identical tire size -->
   <xacro:property name="trailer_wheel_radius"   value="${z_base_to_wheel}"/>
   <xacro:property name="trailer_clearance"      value="0.05"/>   <!-- gap box bottom ↔ tire top -->
-  <xacro:property name="trailer_axle_from_rear" value="0.6"/>    <!-- axle forward from rear bumper -->
-  <xacro:property name="trailer_drawbar_len"    value="2.75"/>    <!-- hitch → chassis frame along -X -->
+  <xacro:property name="trailer_axle_from_rear" value="0.3"/>    <!-- axle forward from rear bumper -->
+  <xacro:property name="trailer_drawbar_len"    value="1.75"/>    <!-- hitch → chassis frame along -X -->
 
   <!-- Derived positions (chassis frame at ground z=0 via drawbar offset) -->
   <xacro:property name="trailer_axle_x" value="${-trailer_length/2.0 + trailer_axle_from_rear}"/>
@@ -176,27 +176,10 @@
   </link>
 
   <!-- ===== Spherical hitch emulation ===== -->
-  <xacro:property name="hitch_roll_limit"  value="3.14159"/>  <!-- +/-180° -->
-  <xacro:property name="hitch_pitch_limit" value="3.14159"/>
-  <xacro:property name="hitch_yaw_limit"   value="3.14159"/>
-  <xacro:property name="hitch_damping"     value="30.0"/>     <!-- increase if jittery -->
+  <xacro:property name="hitch_pitch_limit" value="0.1"/>
+  <xacro:property name="hitch_yaw_limit"   value="1.3"/>
+  <xacro:property name="hitch_damping"     value="30.0"/>
   <xacro:property name="hitch_friction"    value="0.5"/>
-
-  <!-- Rx link at chassis rear center -->
-  <link name="hitch_rx_link">
-    <inertial>
-      <mass value="0.5"/>
-      <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0"/>
-    </inertial>
-  </link>
-  <joint name="hitch_rx" type="revolute">
-    <parent link="chassis"/>
-    <child  link="hitch_rx_link"/>
-    <origin xyz="${x_base_to_rear} 0 ${hitch_height}" rpy="0 0 0"/>
-    <axis xyz="1 0 0"/> <!-- roll -->
-    <limit lower="-${hitch_roll_limit}" upper="${hitch_roll_limit}" effort="500.0" velocity="5.0"/>
-    <dynamics damping="${hitch_damping}" friction="${hitch_friction}"/>
-  </joint>
 
   <!-- Ry link at the same point -->
   <link name="hitch_ry_link">
@@ -206,7 +189,7 @@
     </inertial>
   </link>
   <joint name="hitch_ry" type="revolute">
-    <parent link="hitch_rx_link"/>
+    <parent link="chassis"/>
     <child  link="hitch_ry_link"/>
     <origin xyz="0 0 0" rpy="0 0 0"/>
     <axis xyz="0 1 0"/> <!-- pitch -->
@@ -297,5 +280,20 @@
       <child  link="trailer_base_link"/>
       <origin xyz="${trailer_axle_x} 0 ${trailer_wheel_radius}" rpy="0 0 0"/>
     </joint>
+
+    <gazebo>
+      <plugin name="gt_odom" filename="libgazebo_ros_p3d.so">
+        <!-- TF frames -->
+        <frame_name>odom</frame_name>
+        <body_name>base_link</body_name>
+        <publish_tf>true</publish_tf>
+
+        <update_rate>50.0</update_rate>
+        <gaussian_noise>0.0</gaussian_noise>
+
+        <xyz_offset>0 0 0</xyz_offset>
+        <rpy_offset>0 0 0</rpy_offset>
+      </plugin>
+    </gazebo>
 
 </robot>
