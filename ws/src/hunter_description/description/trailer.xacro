@@ -1,0 +1,136 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- These two brings in your mesh + inertial macros.
+       If your project already includes them at top-level, you can delete these lines. -->
+  <xacro:include filename="inertial_macros.xacro"/>
+  <xacro:include filename="meshes.xacro"/>
+
+  <!--
+    Macro: trailer
+    Creates a trailer with:
+      - revolute yaw hitch at parent frame
+      - fixed drawbar of length drawbar_len
+      - box body whose BOTTOM clears the tires by `clearance`
+      - single axle with two wheels (reusing your robot wheel mesh + inertials)
+
+    Params:
+      name                : prefix for links/joints (default: "trailer")
+      parent              : parent link name (e.g., "chassis")
+      hitch_z             : the z offset of the hitch joint
+      hitch_y             : the y offset of the hitch joint
+      hitch_rpy           : rpy of hitch in parent frame
+      length,width,height : trailer box dimensions (m)
+      mass                : trailer mass (kg)
+      wheel_radius        : wheel radius (m)
+      clearance           : gap between tire top and box bottom (m)
+      axle_from_rear      : distance of axle forward from the rear bumper (m)
+      drawbar_len         : distance from hitch to trailer chassis frame along -X (m)
+      left_wheel_mesh     : xacro mesh macro name for left trailer wheel (e.g., "rear_left_wheel")
+      right_wheel_mesh    : xacro mesh macro name for right trailer wheel (e.g., "rear_right_wheel")
+  -->
+    <xacro:macro name="trailer" params="
+        name:='trailer'
+        parent:=''
+        hitch_y:=0.0
+        hitch_z:=0.0
+        length:=6.0 width:=0.8 height:=1.2
+        mass:=200.0
+        wheel_radius:=0.33
+        clearance:=0.05
+        axle_from_rear:=0.8
+        drawbar_len:=4.3
+        left_wheel_mesh:=rear_left_wheel
+        right_wheel_mesh:=rear_right_wheel">
+
+      <!-- derived geometry -->
+      <xacro:property name="t_axle_x" value="${-length/2.0 + axle_from_rear}"/>
+      <xacro:property name="t_axle_z" value="${wheel_radius}"/>
+      <xacro:property name="t_box_z"  value="${height/2.0 + wheel_radius + clearance}"/>
+
+      <!-- hitch link & joint -->
+      <link name="${name}_hitch_link">
+        <inertial>
+          <mass value="5.0"/>
+          <inertia ixx="0.02" iyy="0.02" izz="0.02" ixy="0" ixz="0" iyz="0"/>
+        </inertial>
+        <visual>
+          <geometry><cylinder radius="0.04" length="0.08"/></geometry>
+          <origin xyz="0 0 0"/>
+          <material name="dark_grey"><color rgba="0.2 0.2 0.2 1"/></material>
+        </visual>
+        <collision>
+          <geometry><cylinder radius="0.04" length="0.08"/></geometry>
+        </collision>
+      </link>
+
+      <joint name="${name}_hitch_joint" type="revolute">
+        <parent link="${parent}"/>
+        <child  link="${name}_hitch_link"/>
+        <!-- X=0 always; parametrize Y and Z -->
+        <origin xyz="0 ${hitch_y} ${hitch_z}" rpy="0 0 0"/>
+        <axis xyz="0 0 1"/>
+        <limit lower="-3.14159" upper="3.14159" effort="200.0" velocity="2.0"/>
+        <dynamics damping="10.0" friction="1.0"/>
+      </joint>
+
+      <!-- trailer chassis (box visual/collision as before) -->
+      <link name="${name}_chassis">
+        <inertial>
+          <mass value="${mass}"/>
+          <inertia
+            ixx="${(1/12.0)*mass*(height*height + length*length)}"
+            iyy="${(1/12.0)*mass*(width*width  + length*length)}"
+            izz="${(1/12.0)*mass*(width*width  + height*height)}"
+            ixy="0" ixz="0" iyz="0"/>
+        </inertial>
+        <visual>
+          <geometry><box size="${length} ${width} ${height}"/></geometry>
+          <origin xyz="0 0 ${t_box_z}" rpy="0 0 0"/>
+          <material name="trailergrey"><color rgba="0.75 0.75 0.75 1"/></material>
+        </visual>
+        <collision>
+          <geometry><box size="${length} ${width} ${height - 0.05}"/></geometry>
+          <origin xyz="0 0 ${t_box_z - 0.025}" rpy="0 0 0"/>
+        </collision>
+      </link>
+
+      <!-- drawbar: back by drawbar_len, and down by hitch_z so chassis frame is at ground z=0 -->
+      <joint name="${name}_drawbar_joint" type="fixed">
+        <parent link="${name}_hitch_link"/>
+        <child  link="${name}_chassis"/>
+        <origin xyz="-${drawbar_len} 0 -${hitch_z}" rpy="0 0 0"/>
+      </joint>
+
+      <!-- wheels (reuse robot meshes) -->
+      <link name="${name}_left_wheel">
+        <xacro:mesh name="${left_wheel_mesh}"/>
+        <xacro:inertial_wheel/>
+      </link>
+      <joint name="${name}_left_wheel_joint" type="continuous">
+        <parent link="${name}_chassis"/>
+        <child  link="${name}_left_wheel"/>
+        <origin xyz="${t_axle_x} ${width/2.0} ${t_axle_z}" rpy="${pi/2} 0 0"/>
+        <axis xyz="0 0 -1"/>
+        <dynamics damping="0.2" friction="0.5"/>
+        <limit effort="20.0" velocity="50.0"/>
+      </joint>
+      <xacro:gazebo_friction reference="${name}_left_wheel"/>
+
+      <link name="${name}_right_wheel">
+        <xacro:mesh name="${right_wheel_mesh}"/>
+        <xacro:inertial_wheel/>
+      </link>
+      <joint name="${name}_right_wheel_joint" type="continuous">
+        <parent link="${name}_chassis"/>
+        <child  link="${name}_right_wheel"/>
+        <origin xyz="${t_axle_x} -${width/2.0} ${t_axle_z}" rpy="${pi/2} 0 0"/>
+        <axis xyz="0 0 -1"/>
+        <dynamics damping="0.2" friction="0.5"/>
+        <limit effort="20.0" velocity="50.0"/>
+        <mimic joint="${name}_left_wheel_joint" multiplier="1.0" offset="0.0"/>
+      </joint>
+      <xacro:gazebo_friction reference="${name}_right_wheel"/>
+
+    </xacro:macro>
+</robot>

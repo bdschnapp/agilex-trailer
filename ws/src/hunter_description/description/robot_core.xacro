@@ -1,0 +1,261 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Include the inertial values from the following -->
+  <xacro:include filename="inertial_macros.xacro"/> 
+  <xacro:include filename="meshes.xacro"/>
+
+  <!-- Constants for robot dimensions -->
+  <xacro:property name="z_base_to_wheel" value="-0.19558" />
+  <xacro:property name="x_base_to_rear" value="-0.28" />
+  <xacro:property name="x_base_to_front" value="0.37142" />
+  <xacro:property name="y_base_to_wheel" value="0.2925" />
+  <xacro:property name="max_steer_angle_central" value="0.461" />
+
+  <link name="base_link"/>
+
+  <joint name="chassis_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="chassis"/>
+    <origin rpy="0 0 0" xyz="0 0 0.37"/>
+  </joint>
+
+  <link name="chassis">
+    <xacro:mesh name="chassis"/>
+    <xacro:inertial_chassis/>
+  </link>
+
+  <link name="rear_left_susp_link">
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <!-- 2) Prismatic suspension joint (Z) at the old rear-left wheel mount -->
+  <joint name="rear_left_susp_joint" type="prismatic">
+    <parent link="chassis"/>
+    <child  link="rear_left_susp_link"/>
+    <origin xyz="${x_base_to_rear} ${y_base_to_wheel} ${z_base_to_wheel}" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <!-- ~6 cm travel, biased slightly upward so static load compresses downward -->
+    <limit lower="-0.05" upper="0.02" effort="1e6" velocity="1.0"/>
+    <dynamics damping="300.0" friction="5.0"/>
+  </joint>
+
+  <link name="rear_left_wheel">
+    <xacro:mesh name="rear_left_wheel"/>
+    <xacro:inertial_wheel/>
+  </link>
+
+  <!-- 4) Wheel spin joint from suspension link (keep your orientation) -->
+  <joint name="rear_left_wheel_joint" type="continuous">
+    <parent link="rear_left_susp_link"/>
+    <child  link="rear_left_wheel"/>
+    <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+    <axis xyz="0 0 -1"/>
+    <dynamics damping="0.2" friction="15"/>
+    <limit effort="10.0" velocity="10.0"/>
+  </joint>
+  <xacro:gazebo_friction reference="rear_left_wheel"/>
+
+  <link name="rear_right_susp_link">
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+
+  <joint name="rear_right_susp_joint" type="prismatic">
+    <parent link="chassis"/>
+    <child  link="rear_right_susp_link"/>
+    <origin xyz="${x_base_to_rear} -${y_base_to_wheel} ${z_base_to_wheel}" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <limit lower="-0.05" upper="0.02" effort="1e6" velocity="1.0"/>
+    <dynamics damping="300.0" friction="5.0"/>
+  </joint>
+
+  <link name="rear_right_wheel">
+    <xacro:mesh name="rear_right_wheel"/>
+    <xacro:inertial_wheel/>
+  </link>
+
+  <joint name="rear_right_wheel_joint" type="continuous">
+    <parent link="rear_right_susp_link"/>
+    <child  link="rear_right_wheel"/>
+    <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+    <axis xyz="0 0 -1"/>
+    <dynamics damping="0.2" friction="15"/>
+    <limit effort="10.0" velocity="10.0"/>
+    <mimic joint="rear_left_wheel_joint" multiplier="1.0" offset="0.0"/>
+  </joint>
+  <xacro:gazebo_friction reference="rear_right_wheel"/>
+
+  <link name="front_left_steering_link">
+    <xacro:virtual/>
+    <xacro:inertial_steering_link/>
+  </link>
+  <joint name="front_left_steering_joint" type="revolute">
+    <parent link="chassis"/>
+    <child link="front_left_steering_link"/> 
+    <origin xyz="${x_base_to_front} ${y_base_to_wheel} ${z_base_to_wheel}" rpy="${pi/2} 0 0" />
+    <axis   xyz="0 1 0" />
+    <limit  lower="-${max_steer_angle_central}"  upper="${max_steer_angle_central}"  effort="10.0"  velocity="1" />
+    <dynamics damping="0.2"/>
+  </joint>
+
+  <link name="front_left_wheel">
+    <xacro:mesh name="front_left_wheel"/>
+    <xacro:inertial_wheel/>
+  </link>
+  <joint name="front_left_wheel_joint" type="continuous">
+    <parent link="front_left_steering_link"/>
+    <child link="front_left_wheel"/> 
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <axis   xyz="0 0 -1" />
+  </joint>
+
+  <link name="front_right_steering_link">
+    <xacro:virtual/>
+    <xacro:inertial_steering_link/>
+  </link>
+  <joint name="front_right_steering_joint" type="revolute">
+    <parent link="chassis"/>
+    <child link="front_right_steering_link"/> 
+    <origin xyz="${x_base_to_front}  -${y_base_to_wheel} ${z_base_to_wheel}" rpy="${pi/2} 0 0" />
+    <axis   xyz="0 1 0" />
+    <limit  lower="-${max_steer_angle_central}"  upper="${max_steer_angle_central}"  effort="10.0"  velocity="1" />
+    <dynamics damping="0.2"/>
+    <mimic joint="front_left_steering_joint" multiplier="1.0" offset="0.0"/>
+  </joint>
+  
+  <link name="front_right_wheel">
+    <xacro:mesh name="front_right_wheel"/>
+    <xacro:inertial_wheel/>
+  </link>
+  <joint name="front_right_wheel_joint" type="continuous">
+    <parent link="front_right_steering_link"/>
+    <child link="front_right_wheel"/> 
+    <origin xyz="0 0 0" rpy="0 0 0" />
+    <axis   xyz="0 0 -1" />
+  </joint>
+
+  <!-- ===== Trailer params (tweak as needed) ===== -->
+  <xacro:property name="trailer_length"         value="5.0"/>
+  <xacro:property name="trailer_width"          value="0.8"/>
+  <xacro:property name="trailer_height"         value="1.2"/>
+  <xacro:property name="trailer_mass"           value="100.0"/>
+  <xacro:property name="hitch_height"           value="0.0"/>
+
+  <!-- match your robot’s wheel radius if you want identical tire size -->
+  <xacro:property name="trailer_wheel_radius"   value="${z_base_to_wheel}"/>
+  <xacro:property name="trailer_clearance"      value="0.05"/>   <!-- gap box bottom ↔ tire top -->
+  <xacro:property name="trailer_axle_from_rear" value="0.6"/>    <!-- axle forward from rear bumper -->
+  <xacro:property name="trailer_drawbar_len"    value="2.75"/>    <!-- hitch → chassis frame along -X -->
+
+  <!-- Derived positions (chassis frame at ground z=0 via drawbar offset) -->
+  <xacro:property name="trailer_axle_x" value="${-trailer_length/2.0 + trailer_axle_from_rear}"/>
+  <xacro:property name="trailer_axle_z" value="${trailer_wheel_radius}"/>
+  <xacro:property name="trailer_box_z"  value="${trailer_height/2.0 + trailer_wheel_radius + trailer_clearance}"/>
+  <xacro:property name="trailer_box_z"  value="${trailer_height/2.0 + trailer_clearance}"/>
+
+  <!-- ========== Hitch pivot at chassis rear (yaw about Z) ========== -->
+  <link name="trailer_hitch_link">
+    <inertial>
+      <mass value="5.0"/>
+      <inertia ixx="0.02" iyy="0.02" izz="0.02" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <geometry><cylinder radius="0.04" length="0.12"/></geometry>
+      <origin xyz="0 0 0"/>
+      <material name="dark_grey"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.04" length="0.12"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="trailer_hitch_joint" type="continuous">
+    <parent link="chassis"/>
+    <child  link="trailer_hitch_link"/>
+    <!-- rear center of chassis, at your defined hitch height -->
+    <origin xyz="${x_base_to_rear} 0 ${hitch_height}" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/>
+    <dynamics damping="0.2" friction="0.5"/>
+    <limit effort="20.0" velocity="50.0"/>
+  </joint>
+
+  <!-- ========== Trailer chassis (frame at ground via drawbar drop) ========== -->
+  <link name="trailer_chassis">
+    <inertial>
+      <mass value="${trailer_mass}"/>
+      <inertia
+        ixx="${(1/12.0)*trailer_mass*(trailer_height*trailer_height + trailer_length*trailer_length)}"
+        iyy="${(1/12.0)*trailer_mass*(trailer_width*trailer_width  + trailer_length*trailer_length)}"
+        izz="${(1/12.0)*trailer_mass*(trailer_width*trailer_width  + trailer_height*trailer_height)}"
+        ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+
+    <!-- Visual box sits above tires -->
+    <visual>
+      <geometry><box size="${trailer_length} ${trailer_width} ${trailer_height}"/></geometry>
+      <origin xyz="0 0 ${trailer_box_z}" rpy="0 0 0"/>
+      <material name="trailergrey"><color rgba="0.75 0.75 0.75 1"/></material>
+    </visual>
+    <collision>
+      <geometry><box size="${trailer_length} ${trailer_width} ${trailer_height}"/></geometry>
+      <origin xyz="0 0 ${trailer_box_z}" rpy="0 0 0"/>
+    </collision>
+  </link>
+
+  <!-- Fix trailer frame w.r.t. hitch and drop to ground by hitch_height -->
+  <joint name="trailer_drawbar_joint" type="fixed">
+    <parent link="trailer_hitch_link"/>
+    <child  link="trailer_chassis"/>
+    <origin xyz="-${trailer_drawbar_len} 0 -${hitch_height}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ========== Wheels (reuse your robot’s wheel meshes/inertials) ========== -->
+  <link name="trailer_left_wheel">
+    <xacro:mesh name="rear_left_wheel"/>
+    <xacro:inertial_wheel/>
+  </link>
+  <joint name="trailer_left_wheel_joint" type="continuous">
+    <parent link="trailer_chassis"/>
+    <child  link="trailer_left_wheel"/>
+    <origin xyz="${trailer_axle_x} ${trailer_width/2.0} ${trailer_axle_z}" rpy="${pi/2} 0 0"/>
+    <axis xyz="0 0 -1"/>
+    <dynamics damping="0.2" friction="0.5"/>
+    <limit effort="20.0" velocity="50.0"/>
+  </joint>
+  <xacro:gazebo_friction reference="trailer_left_wheel"/>
+
+  <link name="trailer_right_wheel">
+    <xacro:mesh name="rear_right_wheel"/>
+    <xacro:inertial_wheel/>
+  </link>
+  <joint name="trailer_right_wheel_joint" type="continuous">
+    <parent link="trailer_chassis"/>
+    <child  link="trailer_right_wheel"/>
+    <origin xyz="${trailer_axle_x} -${trailer_width/2.0} ${trailer_axle_z}" rpy="${pi/2} 0 0"/>
+    <axis xyz="0 0 -1"/>
+    <dynamics damping="0.2" friction="0.5"/>
+    <limit effort="20.0" velocity="50.0"/>
+  </joint>
+  <xacro:gazebo_friction reference="trailer_right_wheel"/>
+
+    <gazebo reference="trailer_left_wheel">
+      <mu1>1.2</mu1>      <!-- along fdir1 (rolling) -->
+      <mu2>0.15</mu2>     <!-- lateral slip allowed -->
+      <slip1>0.0</slip1>  <!-- rolling -->
+      <slip2>0.02</slip2> <!-- lateral relaxation -->
+      <fdir1>1 0 0</fdir1>
+      <kp>2e6</kp> <kd>1e3</kd> <!-- softer contact helps stability -->
+    </gazebo>
+    <gazebo reference="trailer_right_wheel">
+      <mu1>1.2</mu1><mu2>0.15</mu2><slip1>0.0</slip1><slip2>0.02</slip2>
+      <fdir1>1 0 0</fdir1>
+      <kp>2e6</kp> <kd>1e3</kd>
+    </gazebo>
+
+</robot>
