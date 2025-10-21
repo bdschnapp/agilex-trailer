@@ -65,6 +65,81 @@ Visualization Manager:
         Expand Link Details: false
         Expand Tree: false
         Link Tree Style: Links in Alphabetic Order
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        chassis:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        front_left_steering_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        front_left_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        front_right_steering_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        front_right_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        hitch_ry_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        rear_left_susp_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        rear_left_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        rear_right_susp_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        rear_right_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        trailer_base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        trailer_chassis:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        trailer_hitch_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        trailer_left_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        trailer_right_wheel:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
       Mass Properties:
         Inertia: false
         Mass: false
@@ -78,9 +153,41 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: true
+        base_link:
+          Value: true
+        chassis:
+          Value: true
+        front_left_steering_link:
+          Value: true
+        front_left_wheel:
+          Value: true
+        front_right_steering_link:
+          Value: true
+        front_right_wheel:
+          Value: true
+        hitch_ry_link:
+          Value: true
         map:
           Value: true
         odom:
+          Value: true
+        rear_left_susp_link:
+          Value: true
+        rear_left_wheel:
+          Value: true
+        rear_right_susp_link:
+          Value: true
+        rear_right_wheel:
+          Value: true
+        trailer_base_link:
+          Value: true
+        trailer_chassis:
+          Value: true
+        trailer_hitch_link:
+          Value: true
+        trailer_left_wheel:
+          Value: true
+        trailer_right_wheel:
           Value: true
         world:
           Value: true
@@ -93,7 +200,29 @@ Visualization Manager:
         world:
           map:
             odom:
-              {}
+              base_link:
+                chassis:
+                  front_left_steering_link:
+                    front_left_wheel:
+                      {}
+                  front_right_steering_link:
+                    front_right_wheel:
+                      {}
+                  hitch_ry_link:
+                    trailer_hitch_link:
+                      trailer_chassis:
+                        trailer_base_link:
+                          {}
+                        trailer_left_wheel:
+                          {}
+                        trailer_right_wheel:
+                          {}
+                  rear_left_susp_link:
+                    rear_left_wheel:
+                      {}
+                  rear_right_susp_link:
+                    rear_right_wheel:
+                      {}
       Update Interval: 0
       Value: true
     - Alpha: 1
@@ -151,6 +280,19 @@ Visualization Manager:
         Value: /map_updates
       Use Timestamp: false
       Value: true
+    - Alpha: 1
+      Class: rviz_default_plugins/Polygon
+      Color: 25; 255; 0
+      Enabled: true
+      Name: Polygon
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /robot_trailer_footprint
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -197,25 +339,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 28.472209930419922
+      Distance: 11.381204605102539
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: 0.2826876640319824
+        Y: -0.8993869423866272
+        Z: -1.6253089904785156
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.8503985404968262
+      Pitch: 0.6447974443435669
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 6.19359016418457
+      Yaw: 6.27046537399292
     Saved: ~
 Window Geometry:
   Displays:

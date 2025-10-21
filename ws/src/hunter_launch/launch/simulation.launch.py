@@ -118,6 +118,19 @@ def generate_launch_description():
         output='screen'
     )
 
+    vehicle_params = os.path.join(
+        get_package_share_directory('hunter_launch'),
+        'config',
+        'vehicle_params.yaml'
+    )
+    footprint = Node(
+        package='planning',
+        executable='footprint_publisher',
+        name='footprint_publisher',
+        output='screen',
+        parameters=[vehicle_params],
+    )
+
     return LaunchDescription([
         use_sim_time,
 
@@ -136,5 +149,6 @@ def generate_launch_description():
         occupancy_grid,
         static_world_to_map,
         static_map_to_odom,
-        odom_to_tf
+        odom_to_tf,
+        footprint
     ])
