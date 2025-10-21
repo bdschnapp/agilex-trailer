@@ -36,6 +36,37 @@
       <state_interface name="velocity"/>
       <state_interface name="position"/>
     </joint>
+    <joint name="hitch_rx">
+    <state_interface name="position"/>
+    <state_interface name="velocity"/>
+  </joint>
+  <joint name="hitch_ry">
+    <state_interface name="position"/>
+    <state_interface name="velocity"/>
+  </joint>
+  <joint name="hitch_rz">
+    <state_interface name="position"/>
+    <state_interface name="velocity"/>
+  </joint>
+
+  <joint name="rear_left_susp_joint">
+    <state_interface name="position"/>
+    <state_interface name="velocity"/>
+  </joint>
+  <joint name="rear_right_susp_joint">
+    <state_interface name="position"/>
+    <state_interface name="velocity"/>
+  </joint>
+
+  <!-- Trailer wheel spin joints, if you want their states too -->
+  <joint name="trailer_left_wheel_joint">
+    <state_interface name="position"/>
+    <state_interface name="velocity"/>
+  </joint>
+  <joint name="trailer_right_wheel_joint">
+    <state_interface name="position"/>
+    <state_interface name="velocity"/>
+  </joint>
     
   </ros2_control>
   <gazebo>

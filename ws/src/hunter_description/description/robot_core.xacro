@@ -175,14 +175,53 @@
     </collision>
   </link>
 
-  <joint name="trailer_hitch_joint" type="continuous">
+  <!-- ===== Spherical hitch emulation ===== -->
+  <xacro:property name="hitch_roll_limit"  value="3.14159"/>  <!-- +/-180° -->
+  <xacro:property name="hitch_pitch_limit" value="3.14159"/>
+  <xacro:property name="hitch_yaw_limit"   value="3.14159"/>
+  <xacro:property name="hitch_damping"     value="30.0"/>     <!-- increase if jittery -->
+  <xacro:property name="hitch_friction"    value="0.5"/>
+
+  <!-- Rx link at chassis rear center -->
+  <link name="hitch_rx_link">
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="hitch_rx" type="revolute">
     <parent link="chassis"/>
-    <child  link="trailer_hitch_link"/>
-    <!-- rear center of chassis, at your defined hitch height -->
+    <child  link="hitch_rx_link"/>
     <origin xyz="${x_base_to_rear} 0 ${hitch_height}" rpy="0 0 0"/>
-    <axis xyz="0 0 1"/>
-    <dynamics damping="0.2" friction="0.5"/>
-    <limit effort="20.0" velocity="50.0"/>
+    <axis xyz="1 0 0"/> <!-- roll -->
+    <limit lower="-${hitch_roll_limit}" upper="${hitch_roll_limit}" effort="500.0" velocity="5.0"/>
+    <dynamics damping="${hitch_damping}" friction="${hitch_friction}"/>
+  </joint>
+
+  <!-- Ry link at the same point -->
+  <link name="hitch_ry_link">
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="hitch_ry" type="revolute">
+    <parent link="hitch_rx_link"/>
+    <child  link="hitch_ry_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/> <!-- pitch -->
+    <limit lower="-${hitch_pitch_limit}" upper="${hitch_pitch_limit}" effort="500.0" velocity="5.0"/>
+    <dynamics damping="${hitch_damping}" friction="${hitch_friction}"/>
+  </joint>
+
+  <!-- Rz joint into your existing trailer_hitch_link (acts like old yaw) -->
+  <joint name="hitch_rz" type="revolute">
+    <parent link="hitch_ry_link"/>
+    <child  link="trailer_hitch_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/> <!-- yaw -->
+    <limit lower="-${hitch_yaw_limit}" upper="${hitch_yaw_limit}" effort="500.0" velocity="5.0"/>
+    <dynamics damping="${hitch_damping}" friction="${hitch_friction}"/>
   </joint>
 
   <!-- ========== Trailer chassis (frame at ground via drawbar drop) ========== -->
@@ -244,18 +283,19 @@
   </joint>
   <xacro:gazebo_friction reference="trailer_right_wheel"/>
 
-    <gazebo reference="trailer_left_wheel">
-      <mu1>1.2</mu1>      <!-- along fdir1 (rolling) -->
-      <mu2>0.15</mu2>     <!-- lateral slip allowed -->
-      <slip1>0.0</slip1>  <!-- rolling -->
-      <slip2>0.02</slip2> <!-- lateral relaxation -->
-      <fdir1>1 0 0</fdir1>
-      <kp>2e6</kp> <kd>1e3</kd> <!-- softer contact helps stability -->
-    </gazebo>
-    <gazebo reference="trailer_right_wheel">
-      <mu1>1.2</mu1><mu2>0.15</mu2><slip1>0.0</slip1><slip2>0.02</slip2>
-      <fdir1>1 0 0</fdir1>
-      <kp>2e6</kp> <kd>1e3</kd>
-    </gazebo>
+    <!-- trailer_base_link at axle center (child of trailer_chassis) -->
+    <link name="trailer_base_link">
+      <!-- keep it nearly massless but non-zero for stability -->
+      <inertial>
+        <mass value="0.001"/>
+        <inertia ixx="1e-6" iyy="1e-6" izz="1e-6" ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+    </link>
+
+    <joint name="trailer_base_fixed" type="fixed">
+      <parent link="trailer_chassis"/>
+      <child  link="trailer_base_link"/>
+      <origin xyz="${trailer_axle_x} 0 ${trailer_wheel_radius}" rpy="0 0 0"/>
+    </joint>
 
 </robot>

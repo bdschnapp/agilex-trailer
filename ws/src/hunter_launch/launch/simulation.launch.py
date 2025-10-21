@@ -63,14 +63,35 @@ def generate_launch_description():
 
     # --- PCD Map Publisher (PointCloud2) ---
     default_pcd_map_path = os.path.join(get_package_share_directory('hunter_launch'), 'maps', 'map.pcd')
-    pcd_to_cloud = Node(
-        package='pcl_ros',
-        executable='pcd_to_pointcloud',
-        name='pcd_to_pointcloud',
-        remappings=[('cloud_pcd', '/pcd_map')],  # output topic
-        parameters=[{'frame_id': 'world'}, {'use_sim_time': use_sim_time_cfg}, {'file_name': default_pcd_map_path}],
+    pcd_static = Node(
+        package='planning',
+        executable='static_pcd_publisher',
+        name='static_pcd_publisher',
+        arguments=[default_pcd_map_path, 'map'],
         output='screen'
     )
+
+    # --- Occupancy Grid Publisher ---
+    occupancy_grid = Node(
+            package='planning',
+            executable='pcd_to_occupancy_grid',
+            name='pcd_to_occupancy_grid',
+            output='screen',
+            parameters=[{
+                'cloud_topic': '/pcd_map',
+                'frame_id': 'map',
+                'resolution': 0.05,
+                'size_x': 80.0, 'size_y': 80.0,
+                'origin_x': -40.0, 'origin_y': -40.0,
+                'z_min': 0.05, 'z_max': 1.8,
+                'downsample_voxel': 0.05,
+                'min_hits_per_cell': 2,
+                'inflate_radius': 0.20,
+                'occupied_value': 100,
+                'free_value': 0,
+                'unknown_value': -1
+            }]
+        )
 
     # --- Static TF: world -> map ---
     static_world_to_map = Node(
@@ -103,7 +124,8 @@ def generate_launch_description():
         rviz,
 
         # PCD map + TF
-        pcd_to_cloud,
+        pcd_static,
+        occupancy_grid,
         static_world_to_map,
         static_map_to_odom
     ])
