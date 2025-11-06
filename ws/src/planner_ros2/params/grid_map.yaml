@@ -1,0 +1,5 @@
+/**:
+  ros__parameters:
+    grid_map/map_size_x: 200.0
+    grid_map/map_size_y: 200.0
+    grid_map/resolution: 0.5

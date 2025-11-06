@@ -1,0 +1,17 @@
+/**:
+  ros__parameters:
+    hybrid_astar/yaw_resolution: 0.17453292519943295
+    hybrid_astar/lambda_heu: 1.0
+    hybrid_astar/weight_r2: 1.0
+    hybrid_astar/weight_delta: 0.0
+    hybrid_astar/weight_v_change: 5.0
+    hybrid_astar/weight_delta_change: 5.0
+    hybrid_astar/time_interval: 1.0
+    hybrid_astar/oneshot_range: 10.0
+    hybrid_astar/check_ratio: 0.5
+    hybrid_astar/max_vel: 0.5
+    hybrid_astar/pos_tol: 0.5
+    hybrid_astar/theta_tol: 0.2
+    hybrid_astar/max_time_consume: 5.0
+    hybrid_astar/heuristic_type: 0
+    hybrid_astar/in_test: false

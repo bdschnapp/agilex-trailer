@@ -1,0 +1,37 @@
+/**:
+  ros__parameters:
+    arc_opt/rho_T: 50.0
+    arc_opt/collision_type: 0
+    arc_opt/corridor_limit: 3.0
+    arc_opt/piece_len: 1.0
+    arc_opt/piece_times: 1.5
+    arc_opt/max_alon: 2.0
+    arc_opt/max_alat: 10000.0
+    arc_opt/max_vel: 2.0
+    arc_opt/max_angular_vel: 2.0
+    arc_opt/max_kappa: 1.68
+    arc_opt/max_thetad: 1.47
+    arc_opt/safe_threshold: 0.36
+    arc_opt/g_epsilon: 1.0e-3
+    arc_opt/min_step: 1.0e-32
+    arc_opt/inner_max_iter: 10000.0
+    arc_opt/delta: 1.0e-4
+    arc_opt/mem_size: 64
+    arc_opt/past: 3
+    arc_opt/int_K: 8
+    arc_opt/in_debug: false
+    arc_opt/rho: 1.0
+    arc_opt/beta: 1000.0
+    arc_opt/gamma: 1.0
+    arc_opt/epsilon_con: 0.1
+    arc_opt/max_iter: 100.0
+    arc_opt/use_scaling: false
+    arc_opt/inner_weight_jerk: 0.1
+    arc_opt/inner_weight_kinetics: 10.0
+    arc_opt/inner_weight_vel: 1.0
+    arc_opt/inner_weight_min_vel: 1.0
+    arc_opt/inner_weight_alon: 5.0
+    arc_opt/inner_weight_alat: 2.0
+    arc_opt/inner_weight_kappa: 20.0
+    arc_opt/inner_weight_collision: 50.0
+    arc_opt/inner_weight_tail: 500.0

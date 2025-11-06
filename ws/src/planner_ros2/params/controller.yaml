@@ -1,0 +1,12 @@
+/**:
+  ros__parameters:
+    mpc.dt: 0.1
+    mpc.predict_steps: 10
+    mpc.max_speed: 2.0
+    mpc.min_speed: 0.0
+    mpc.max_accel: 2.0
+    mpc.max_dsteer: 1.5
+    mpc.delay_num: 0
+    mpc.matrix_q: [100.0, 100.0, 1.0, 0.1]
+    mpc.matrix_r: [0.1, 0.01]
+    mpc.matrix_rd: [0.01, 10.0]
