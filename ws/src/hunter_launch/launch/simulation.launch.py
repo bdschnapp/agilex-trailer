@@ -3,13 +3,22 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, RegisterEventHandler, SetEnvironmentVariable, IncludeLaunchDescription, ExecuteProcess
 from launch.event_handlers import OnProcessExit
 from launch.substitutions import LaunchConfiguration, Command, FindExecutable, PathJoinSubstitution
+from launch.conditions import IfCondition
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from ament_index_python.packages import get_package_share_directory
+from launch.actions import SetEnvironmentVariable
+from launch.substitutions import EnvironmentVariable, TextSubstitution
 
 def generate_launch_description():
+    use_sim_arg = DeclareLaunchArgument(
+        'use_sim',
+        default_value='true',
+        description='Use simulation'
+    )
+
     use_sim_time = DeclareLaunchArgument('use_sim_time', default_value='true')
     use_sim_time_cfg = LaunchConfiguration('use_sim_time')
 
@@ -61,7 +70,7 @@ def generate_launch_description():
         additional_env={"XDG_RUNTIME_DIR": "/tmp/xdg-runtime-rviz"},  # silence the runtime dir warning
     )
 
-    # --- PCD Map Publisher (PointCloud2) ---
+    # --- PCD Map Publisher (PCD -> PointCloud2) ---
     default_pcd_map_path = os.path.join(get_package_share_directory('hunter_launch'), 'maps', 'map.pcd')
     pcd_static = Node(
         package='planning',
@@ -71,7 +80,21 @@ def generate_launch_description():
         output='screen'
     )
 
-    # --- Occupancy Grid Publisher ---
+    # --- PointCloud Filter (PointCloud2 -> PointCloud2) ---
+    pcd_filtered = Node(
+            package='planning',
+            executable='pcd_filter',
+            name='pcd_filter_node',
+            parameters=[{
+                'input_topic': '/pcd_map',
+                'output_topic': '/global_map',
+                'z_min': 0.05,
+                'z_max': 2.0,
+            }],
+            output='screen'
+        )
+
+    # --- Occupancy Grid Publisher (PointCloud2 -> OccupancyGrid) ---
     occupancy_grid = Node(
             package='planning',
             executable='pcd_to_occupancy_grid',
@@ -93,7 +116,7 @@ def generate_launch_description():
             }]
         )
 
-    # --- Static TF: world -> map ---
+    # --- Static TF: (world -> map) ---
     static_world_to_map = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
@@ -101,7 +124,7 @@ def generate_launch_description():
         arguments=['0', '0', '0', '0', '0', '0', '1', 'world', 'map'],
         output='screen'
     )
-    # --- Static TF: map -> odom ---
+    # --- Static TF: (map -> odom) ---
     static_map_to_odom = Node(
         package='tf2_ros',
         executable='static_transform_publisher',
@@ -115,7 +138,8 @@ def generate_launch_description():
         package='planning',
         executable='odom_to_tf',
         name='odom_to_tf',
-        output='screen'
+        output='screen',
+        remappings=[('/odom', '/ackermann_like_controller/odom')]
     )
 
     vehicle_params = os.path.join(
@@ -123,6 +147,8 @@ def generate_launch_description():
         'config',
         'vehicle_params.yaml'
     )
+
+    # --- Footprint Publisher (JointState -> Footprint) ---
     footprint = Node(
         package='planning',
         executable='footprint_publisher',
@@ -131,14 +157,107 @@ def generate_launch_description():
         parameters=[vehicle_params],
     )
 
+    ################
+    # planner_ros2 #
+    ################
+
+    planner_ros2_dir = get_package_share_directory('planner_ros2')
+    grid_map_params = os.path.join(planner_ros2_dir, 'params', 'grid_map.yaml')
+    hybrid_astar_params = os.path.join(planner_ros2_dir, 'params', 'hybrid_astar.yaml')
+    optimizer_params = os.path.join(planner_ros2_dir, 'params', 'optimizer.yaml')
+    trailer_params = os.path.join(planner_ros2_dir, 'params', 'trailer.yaml')
+    controller_params = os.path.join(planner_ros2_dir, 'params', 'controller.yaml')
+
+    simulator_node = Node(
+        package='planner_ros2',
+        executable='simulator_node',
+        name='simulator_node',
+        output='screen',
+        condition=IfCondition(LaunchConfiguration('use_sim')),
+        remappings=[
+            ('~/cmd', '/trailer_cmd'),
+            ('~/odom', '/trailer_odom'),
+            ('~/sensor_odom', '/sensor_odom'),
+        ],
+        parameters=[
+            grid_map_params,
+            hybrid_astar_params,
+            optimizer_params,
+            trailer_params,
+            controller_params,
+        ]
+    )
+
+    planner_node = Node(
+        package='planner_ros2',
+        executable='planner_node',
+        name='planner_node',
+        output='screen',
+        remappings=[
+            ('~/odom', '/trailer_odom'),
+        ],
+        parameters=[
+            grid_map_params,
+            hybrid_astar_params,
+            optimizer_params,
+            trailer_params,
+            controller_params,
+        ]
+    )
+
+    set_casadipath = SetEnvironmentVariable(
+        name='CASADIPATH', value='/opt/casadi-3.6.5/lib'
+    )
+
+    set_ld = SetEnvironmentVariable(
+        name='LD_LIBRARY_PATH',
+        value=[
+            EnvironmentVariable('LD_LIBRARY_PATH'),
+            TextSubstitution(text=':/opt/casadi-3.6.5/lib:/opt/qpOASES/lib')
+        ]
+    )
+
+    mpc_node = Node(
+        package='planner_ros2',
+        executable='mpc_node',
+        name='mpc_node',
+        output='screen',
+        condition=IfCondition(LaunchConfiguration('use_sim')),
+        remappings=[
+            ('~/cmd', '/trailer_cmd'),
+            ('~/odom', '/trailer_odom'),
+            ('~/arc_traj', '/arc_trailer_traj'),
+        ],
+        parameters=[
+            grid_map_params,
+            hybrid_astar_params,
+            optimizer_params,
+            trailer_params,
+            controller_params,
+        ]
+    )
+
+    ######################
+    # Planning -> Gazebo #
+    ######################
+
+    ack_to_twist = Node(
+        package='planning', executable='ackermann_to_twist', name='ackermann_to_twist_bridge',
+        parameters=[{'wheelbase': 0.65,
+                     'src': '/trailer_cmd',
+                     'dst': '/ackermann_like_controller/cmd_vel'}],
+        output='screen'
+    )
+
     return LaunchDescription([
+        use_sim_arg,
         use_sim_time,
 
         # event chain for ros2_control controllers
         RegisterEventHandler(OnProcessExit(target_action=spawn_entity, on_exit=[load_joint_state_broadcaster])),
         RegisterEventHandler(OnProcessExit(target_action=load_joint_state_broadcaster, on_exit=[load_ackermann_controller])),
 
-        # Gazebo + robot
+        # Gazebo + Rviz Simulation
         gazebo,
         node_robot_state_publisher,
         spawn_entity,
@@ -146,9 +265,18 @@ def generate_launch_description():
 
         # PCD map + TF
         pcd_static,
+        pcd_filtered,
         occupancy_grid,
         static_world_to_map,
         static_map_to_odom,
         odom_to_tf,
-        footprint
+        footprint,
+
+        # Planning + Control
+        set_casadipath,
+        set_ld,
+        simulator_node,
+        planner_node,
+        mpc_node,
+        ack_to_twist,
     ])

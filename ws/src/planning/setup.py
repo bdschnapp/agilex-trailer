@@ -39,9 +39,11 @@ setup(
     entry_points={
         'console_scripts': [
             'static_pcd_publisher = planning.static_pcd_publisher:main',
+            'pcd_filter = planning.pcd_filter:main',
             'pcd_to_occupancy_grid = planning.pcd_to_occupancy_grid:main',
             'odom_to_tf = planning.odom_to_tf:main',
             'footprint_publisher = planning.footprint_publisher:main',
+            'ackermann_to_twist = planning.ack_to_twist:main',
         ],
     },
 )

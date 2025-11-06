@@ -1,1 +1,1 @@
-colcon build --symlink-install --packages-skip random_map_generator --cmake-args -DCMAKE_BUILD_TYPE=Release -Wno-dev
+colcon build --symlink-install --packages-skip random_map_generator planner_ros2 --cmake-args -DCMAKE_BUILD_TYPE=Release -Wno-dev
