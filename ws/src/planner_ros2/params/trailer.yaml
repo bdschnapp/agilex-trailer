@@ -1,14 +1,14 @@
 /**:
   ros__parameters:
-    "/trailer/wheel_base": 3.5
-    "/trailer/width": 0.585
+    "/trailer/wheel_base": 0.65
+    "/trailer/width": 0.6
     "/trailer/rear_length": 0.2  # size of the wheels
-    "/trailer/max_steer": 0.8
+    "/trailer/max_steer": 0.436332
     "/trailer/max_dtheta": 1.0  #
     "/trailer/terminal_tol": 0.4
 
     # trailers: len0--Ltail0--Lhead0--len1--Ltail1--Lhead1--len2 ...
-    "/trailer/length": [1.2, 3.5]
-    "/trailer/Ltail": [0.0]
-    "/trailer/Lhead": [1.85]
+    "/trailer/length": [1.12, 3.6576]
+    "/trailer/Ltail": [-0.2]
+    "/trailer/Lhead": [2.85]
     "/trailer/init_pthetas": [0.0, 0.0, 0.0, 0.0]
