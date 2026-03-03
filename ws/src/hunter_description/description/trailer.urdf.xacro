@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="trailer">
+
+  <!-- Core trailer -->
+  <xacro:include filename="trailer_core.xacro"/>
+
+  <!-- Left landing leg -->
+
+  <link name="landing_leg_left">
+    <inertial>
+      <mass value="8.0"/>
+      <inertia ixx="0.02" iyy="0.02" izz="0.02" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <cylinder radius="${landing_leg_radius}" length="${landing_leg_travel}"/>
+      </geometry>
+      <origin xyz="0 0 ${-landing_leg_travel/2.0}"/>
+    </visual>
+  </link>
+
+  <joint name="landing_leg_left_prismatic" type="prismatic">
+    <parent link="trailer_chassis"/>
+    <child  link="landing_leg_left"/>
+    <origin xyz="${landing_leg_offset_x} ${landing_leg_offset_y} 0"/>
+    <axis xyz="0 0 -1"/>
+    <!-- Fully extended by default -->
+    <limit lower="0.0" upper="${landing_leg_travel}" effort="2000" velocity="0.2"/>
+    <dynamics damping="200.0" friction="50.0"/>
+  </joint>
+
+  <!-- Foot pad -->
+  <link name="landing_foot_left">
+    <inertial>
+      <mass value="2.0"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <cylinder radius="${landing_foot_radius}" length="0.04"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="${landing_foot_radius}" length="0.04"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="landing_foot_left_fixed" type="fixed">
+    <parent link="landing_leg_left"/>
+    <child  link="landing_foot_left"/>
+    <origin xyz="0 0 ${-landing_leg_travel}"/>
+  </joint>
+
+  <!-- Right landing leg -->
+
+  <link name="landing_leg_right">
+    <inertial>
+      <mass value="8.0"/>
+      <inertia ixx="0.002" iyy="0.002" izz="0.002" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <cylinder radius="${landing_leg_radius}" length="${landing_leg_travel}"/>
+      </geometry>
+      <origin xyz="0 0 ${-landing_leg_travel/2.0}"/>
+    </visual>
+  </link>
+
+  <joint name="landing_leg_right_prismatic" type="prismatic">
+    <parent link="trailer_chassis"/>
+    <child  link="landing_leg_right"/>
+    <origin xyz="${landing_leg_offset_x} -${landing_leg_offset_y} 0"/>
+    <axis xyz="0 0 -1"/>
+    <limit lower="0.0" upper="${landing_leg_travel}" effort="2000" velocity="0.2"/>
+    <dynamics damping="200.0" friction="50.0"/>
+  </joint>
+
+  <link name="landing_foot_right">
+    <inertial>
+      <mass value="2.0"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <cylinder radius="${landing_foot_radius}" length="0.04"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="${landing_foot_radius}" length="0.04"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="landing_foot_right_fixed" type="fixed">
+    <parent link="landing_leg_right"/>
+    <child  link="landing_foot_right"/>
+    <origin xyz="0 0 ${-landing_leg_travel}"/>
+  </joint>
+
+</robot>

@@ -44,6 +44,7 @@ setup(
             'odom_to_tf = planning.odom_to_tf:main',
             'footprint_publisher = planning.footprint_publisher:main',
             'ackermann_to_twist = planning.ack_to_twist:main',
+            'trailer_odom_builder = planning.trailer_odom_builder:main',
         ],
     },
 )

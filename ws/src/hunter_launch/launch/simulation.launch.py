@@ -32,7 +32,7 @@ def generate_launch_description():
     # --- Robot description ---
     robot_description_content = Command([
         PathJoinSubstitution([FindExecutable(name="xacro")]), " ",
-        PathJoinSubstitution([FindPackageShare("hunter_description"), "description", "robot.urdf.xacro"]),
+        PathJoinSubstitution([FindPackageShare("hunter_description"), "description", "robot_trailer.urdf.xacro"]),
     ])
     robot_description = {"robot_description": ParameterValue(robot_description_content, value_type=None)}
 
@@ -46,7 +46,7 @@ def generate_launch_description():
     spawn_entity = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
-        arguments=['-topic', 'robot_description', '-entity', 'hunter'],
+        arguments=['-topic', 'robot_description', '-entity', 'hunter_trailer'],
         output='screen',
         parameters=[{'use_sim_time': use_sim_time_cfg}],
     )
@@ -176,7 +176,7 @@ def generate_launch_description():
         condition=IfCondition(LaunchConfiguration('use_sim')),
         remappings=[
             ('~/cmd', '/trailer_cmd'),
-            ('~/odom', '/trailer_odom'),
+            ('~/odom', '/trailer_odom/old'),
             ('~/sensor_odom', '/sensor_odom'),
         ],
         parameters=[
@@ -249,6 +249,20 @@ def generate_launch_description():
         output='screen'
     )
 
+    trailer_odom = Node(
+        package='planning', executable='trailer_odom_builder', name='trailer_odom_builder',
+        output='screen',
+        parameters=[{
+            'tractor_odom_topic': '/odom',
+            'tractor_base_link': 'base_link',
+            'trailer_base_link': 'trailer_base_link',
+            'target_frame': 'world',
+            'publish_topic': '/trailer_odom',
+            'pub_rate_hz': 30.0
+        }]
+    )
+
+
     return LaunchDescription([
         use_sim_arg,
         use_sim_time,
@@ -279,4 +293,5 @@ def generate_launch_description():
         planner_node,
         mpc_node,
         ack_to_twist,
+        trailer_odom,
     ])

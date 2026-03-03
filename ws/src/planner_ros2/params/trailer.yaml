@@ -8,7 +8,7 @@
     "/trailer/terminal_tol": 0.4
 
     # trailers: len0--Ltail0--Lhead0--len1--Ltail1--Lhead1--len2 ...
-    "/trailer/length": [1.20, 3.5]
+    "/trailer/length": [1.2, 3.5]
     "/trailer/Ltail": [0.0]
-    "/trailer/Lhead": [1.65]
+    "/trailer/Lhead": [1.85]
     "/trailer/init_pthetas": [0.0, 0.0, 0.0, 0.0]

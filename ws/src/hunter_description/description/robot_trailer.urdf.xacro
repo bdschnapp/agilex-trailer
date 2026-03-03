@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hunter_trailer">
+  <!-- Robot -->
+  <xacro:include filename="robot.urdf.xacro"/>
+
+  <!-- Trailer -->
+  <xacro:include filename="trailer_core.xacro"/>
+
+  <!-- ========== Hitch pivot at chassis rear (yaw about Z) ========== -->
+  <link name="trailer_hitch_link">
+    <inertial>
+      <mass value="5.0"/>
+      <inertia ixx="0.02" iyy="0.02" izz="0.02" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+    <visual>
+      <geometry><cylinder radius="0.04" length="0.12"/></geometry>
+      <origin xyz="0 0 0"/>
+      <material name="dark_grey"><color rgba="0.2 0.2 0.2 1"/></material>
+    </visual>
+    <collision>
+      <geometry><cylinder radius="0.04" length="0.12"/></geometry>
+    </collision>
+  </link>
+
+  <!-- Ry link at the same point -->
+  <link name="hitch_ry_link">
+    <inertial>
+      <mass value="0.5"/>
+      <inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0" ixz="0" iyz="0"/>
+    </inertial>
+  </link>
+  <joint name="hitch_ry" type="revolute">
+    <parent link="chassis"/>
+    <child  link="hitch_ry_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/> <!-- pitch -->
+    <limit lower="-${hitch_pitch_limit}" upper="${hitch_pitch_limit}" effort="500.0" velocity="5.0"/>
+    <dynamics damping="${hitch_damping}" friction="${hitch_friction}"/>
+  </joint>
+
+  <!-- Rz joint into your existing trailer_hitch_link (acts like old yaw) -->
+  <joint name="hitch_rz" type="revolute">
+    <parent link="hitch_ry_link"/>
+    <child  link="trailer_hitch_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 0 1"/> <!-- yaw -->
+    <limit lower="-${hitch_yaw_limit}" upper="${hitch_yaw_limit}" effort="500.0" velocity="5.0"/>
+    <dynamics damping="${hitch_damping}" friction="${hitch_friction}"/>
+  </joint>
+
+  <!-- Fix trailer frame w.r.t. hitch and drop to ground by hitch_height -->
+  <joint name="trailer_drawbar_joint" type="fixed">
+    <parent link="trailer_hitch_link"/>
+    <child  link="trailer_chassis"/>
+    <origin xyz="-${trailer_drawbar_len} 0 -${hitch_height}" rpy="0 0 0"/>
+  </joint>
+</robot>
