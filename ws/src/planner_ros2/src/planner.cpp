@@ -28,7 +28,7 @@ namespace trailer_planner
             std::bind(&Planner::rcvGoalCallBack, this, std::placeholders::_1));
         
         odom_sub = this->create_subscription<planner_ros2::msg::TrailerState>(
-            "~/odom", 1,
+            "/trailer_odom", 1,
             std::bind(&Planner::rcvOdomCallBack, this, std::placeholders::_1));
     
         start_pos.resize(TRAILER_NUM+3);

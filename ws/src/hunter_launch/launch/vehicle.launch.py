@@ -141,7 +141,7 @@ def generate_launch_description():
         name="scanmatcher_node",
         output="screen",
         parameters=[lidarslam_params_file, {"use_sim_time": use_sim_time_cfg}],
-        remappings=[("/input_cloud", "/rslidar_points")],
+        remappings=[("/input_cloud", "/rslidar_points_front")],
     )
 
     # Graph-based SLAM: Loop closure
@@ -165,46 +165,12 @@ def generate_launch_description():
     # ========================
     # Odometry Conversion
     # ========================
-    # Convert /current_pose (PoseStamped) to /odom (Odometry)
-    # This node needs to be created or we can use pose_to_tf + a custom converter
-    # For now, we'll create a simple converter node
-    pose_to_odom_node = Node(
-        package="planning",
-        executable="pose_to_odom",  # You may need to create this executable
-        name="pose_to_odom_converter",
-        output="screen",
-        parameters=[{"use_sim_time": use_sim_time_cfg}],
-        remappings=[
-            ("/current_pose", "/current_pose"),
-            ("/odom", "/odom"),
-        ],
-    )
-
     # Static TF: world -> map (if needed)
     static_world_to_map = Node(
         package="tf2_ros",
         executable="static_transform_publisher",
         name="static_world_to_map",
         arguments=["0", "0", "0", "0", "0", "0", "1", "world", "map"],
-        output="screen",
-    )
-
-    # Note: map -> odom -> base_link is handled by lidarslam
-    # lidarslam publishes map -> base_link, so we need odom in between
-    # Actually, lidarslam typically publishes map -> odom, and we need odom -> base_link from odometry
-
-    # ========================
-    # Map Publishing
-    # ========================
-    default_pcd_map_path = os.path.join(
-        get_package_share_directory("hunter_launch"), "maps", "map.pcd"
-    )
-
-    pcd_static = Node(
-        package="planning",
-        executable="static_pcd_publisher",
-        name="static_pcd_publisher",
-        arguments=[default_pcd_map_path, "map"],
         output="screen",
     )
 
@@ -242,6 +208,7 @@ def generate_launch_description():
             "occupied_value": 100,
             "free_value": 0,
             "unknown_value": -1,
+            "latched": "false",
         }],
     )
 
@@ -377,11 +344,9 @@ def generate_launch_description():
         tf_base_to_lidar,
 
         # Odometry
-        pose_to_odom_node,
         static_world_to_map,
 
         # Map
-        pcd_static,
         pcd_filtered,
         occupancy_grid,
 
