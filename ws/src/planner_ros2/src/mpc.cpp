@@ -62,7 +62,7 @@ void MPC::init(rclcpp::Node::SharedPtr nh)
     cmd_timer = nh->create_wall_timer(std::chrono::milliseconds(30), [this]() { cmdCallback(); });
 
     odom_sub = nh->create_subscription<planner_ros2::msg::TrailerState>(
-        "~/odom", 100, [this](const planner_ros2::msg::TrailerState::SharedPtr msg) { rcvOdomCallBack(msg); });
+        "/trailer_odom", 100, [this](const planner_ros2::msg::TrailerState::SharedPtr msg) { rcvOdomCallBack(msg); });
     arc_traj_sub = nh->create_subscription<planner_ros2::msg::ArcTrailerTraj>(
         "~/arc_traj", 100, [this](const planner_ros2::msg::ArcTrailerTraj::SharedPtr msg) { rcvArcTrajCallBack(msg); });
     return;

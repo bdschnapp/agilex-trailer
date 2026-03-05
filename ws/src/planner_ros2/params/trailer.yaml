@@ -11,4 +11,8 @@
     "/trailer/length": [1.12, 3.6576]
     "/trailer/Ltail": [-0.2]
     "/trailer/Lhead": [2.85]
+<<<<<<< patch-1
     "/trailer/init_pthetas": [0.0, 0.0, 0.0, 0.0]
+=======
+    "/trailer/init_pthetas": [0.0, 0.0, 0.0, 0.0]
+>>>>>>> main

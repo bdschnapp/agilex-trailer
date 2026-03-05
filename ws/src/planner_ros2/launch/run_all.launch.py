@@ -8,6 +8,8 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.actions import SetEnvironmentVariable
+from launch.substitutions import EnvironmentVariable, TextSubstitution
 
 
 def generate_launch_description():
@@ -36,10 +38,12 @@ def generate_launch_description():
     # Package paths & params
     # -------------------------
     planner_ros2_dir = get_package_share_directory('planner_ros2')
+    vehicle_params_dir = get_package_share_directory('hunter_description')
+
     grid_map_params     = os.path.join(planner_ros2_dir, 'params', 'grid_map.yaml')
     hybrid_astar_params = os.path.join(planner_ros2_dir, 'params', 'hybrid_astar.yaml')
     optimizer_params    = os.path.join(planner_ros2_dir, 'params', 'optimizer.yaml')
-    trailer_params      = os.path.join(planner_ros2_dir, 'params', 'trailer.yaml')
+    trailer_params      = os.path.join(vehicle_params_dir, 'config', 'trailer.yaml')
     controller_params   = os.path.join(planner_ros2_dir, 'params', 'controller.yaml')
 
     # -------------------------
@@ -79,6 +83,18 @@ def generate_launch_description():
             optimizer_params,
             trailer_params,
             controller_params,
+        ]
+    )
+
+    set_casadipath = SetEnvironmentVariable(
+        name='CASADIPATH', value='/opt/casadi-3.6.5/lib'
+    )
+
+    set_ld = SetEnvironmentVariable(
+        name='LD_LIBRARY_PATH',
+        value=[
+            EnvironmentVariable('LD_LIBRARY_PATH'),
+            TextSubstitution(text=':/opt/casadi-3.6.5/lib:/opt/qpOASES/lib')
         ]
     )
 
@@ -132,9 +148,11 @@ def generate_launch_description():
         use_sim_arg,
         map_topic_arg,
         polygon_topic_arg,
+        set_casadipath,
+        set_ld,
         random_map_launch,   # <-- now actually included
         simulator_node,
-        mpc_node,
         planner_node,
+        mpc_node,
         rviz_node,
     ])
